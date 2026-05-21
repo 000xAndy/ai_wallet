@@ -12,17 +12,17 @@ export function MessageBubble({ message }: Props) {
   return (
     <div className={cn('flex gap-3', isUser ? 'justify-end' : 'justify-start')}>
       {!isUser && (
-        <div className="w-8 h-8 bg-brand-600/20 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-          <Bot className="w-4 h-4 text-brand-400" />
+        <div className="w-8 h-8 bg-primary/10 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+          <Bot className="w-4 h-4 text-primary" />
         </div>
       )}
 
       <div
         className={cn(
-          'max-w-[85%] md:max-w-[75%] rounded-2xl px-3 md:px-4 py-2 md:py-2.5',
+          'max-w-[85%] md:max-w-[75%] rounded-20 px-3 md:px-4 py-2 md:py-2.5',
           isUser
-            ? 'bg-brand-600 text-white rounded-br-md'
-            : 'bg-gray-800 text-gray-200 rounded-bl-md'
+            ? 'bg-primary text-primary-foreground rounded-br-md'
+            : 'bg-secondary text-foreground rounded-bl-md'
         )}
       >
         <p className="text-xs md:text-sm whitespace-pre-wrap break-words">{message.content}</p>
@@ -32,8 +32,8 @@ export function MessageBubble({ message }: Props) {
       </div>
 
       {isUser && (
-        <div className="w-8 h-8 bg-gray-700 rounded-full flex items-center justify-center flex-shrink-0 mt-1">
-          <User className="w-4 h-4 text-gray-400" />
+        <div className="w-8 h-8 bg-muted rounded-full flex items-center justify-center flex-shrink-0 mt-1">
+          <User className="w-4 h-4 text-muted-foreground" />
         </div>
       )}
     </div>

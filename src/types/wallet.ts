@@ -1,10 +1,16 @@
+export type WalletType = 'keystore' | 'privateKey';
+
 export interface StoredWallet {
   id: string;
   name: string;
-  encryptedMnemonic: string; // AES-GCM encrypted, hex-encoded
-  encryptedPrivateKey: string; // AES-GCM encrypted, hex-encoded
-  iv: string; // hex-encoded IV
-  salt: string; // hex-encoded PBKDF2 salt
+  walletType: WalletType;
+  // For walletType === 'keystore': tcx-wasm keystore JSON, wrapped with outer AES-GCM
+  encryptedKeystore?: string;
+  // For walletType === 'privateKey': legacy ethers.js wallet fields
+  encryptedMnemonic?: string;
+  encryptedPrivateKey?: string;
+  iv: string; // hex-encoded IV (used for both wallet types)
+  salt: string; // hex-encoded PBKDF2 salt (used for both wallet types)
   addresses: DerivedAddress[];
   createdAt: number;
 }
@@ -16,8 +22,11 @@ export interface DerivedAddress {
   address: string;
 }
 
-export type ChainType = 'ethereum' | 'bsc' | 'polygon';
+export type ChainType = 'ethereum' | 'bsc' | 'polygon' | 'arbitrum' | 'optimism' | 'avalanche' | 'base' | 'linea' | 'fantom' | 'scroll' | 'gnosis' | 'celo';
 export type NetworkType = 'mainnet' | 'testnet';
+
+// tcx-wasm chain identifiers (only EVM chains for this project)
+export type TcxChain = 'ETHEREUM';
 
 export interface ChainConfig {
   chain: ChainType;

@@ -6,10 +6,13 @@ import { useSettingsStore } from '@/stores/settings.store';
 import { useWalletStore } from '@/stores/wallet.store';
 import { useContactStore } from '@/stores/contact.store';
 import {
-  sendNativeToken, sendERC20Token, getFullBalance, resolveChainKey,
+  sendNativeTokenWithPK, sendERC20TokenWithPK,
+  sendNativeTokenWithKeystore, sendERC20TokenWithKeystore,
+  getFullBalance, resolveChainKey,
   getTransactionHistory, estimateGasFee, getTransactionReceipt, getTokenAllowances,
 } from './rpc.service';
-import { unlockWallet } from './wallet.service';
+import { unwrapKeystore, decrypt } from './encryption.service';
+import { clear_cached_keystore } from '@consenlabs/tcx-wasm';
 import type { PendingAction } from '@/types/chat';
 
 function t(key: string): string {
@@ -234,20 +237,40 @@ ${t('transfer.enterPassword')}`;
   yield { text: fullText, pendingTransfer: pendingTransfer ?? undefined };
 }
 
+function isNativeToken(token: string): boolean {
+  const upper = token.toUpperCase();
+  return !token || upper === 'BNB' || upper === 'ETH' || upper === 'POL';
+}
+
 export async function executeTransfer(pending: PendingAction, password: string): Promise<string> {
   const walletStore = useWalletStore.getState();
   const settingsStore = useSettingsStore.getState();
   const wallet = walletStore.wallets.find(w => w.id === walletStore.selectedWalletId);
   if (!wallet) throw new Error('未选择钱包');
 
-  const unlocked = await unlockWallet(wallet.id, password);
-
   const { to, amount, token = 'BNB', network = 'BSC' } = pending.params;
   const chainKey = resolveChainKey(network, settingsStore.networkMode);
+  const from = wallet.addresses[0]?.address ?? '';
 
-  if (!token || token.toUpperCase() === 'BNB' || token.toUpperCase() === 'ETH' || token.toUpperCase() === 'POL') {
-    return sendNativeToken(unlocked.privateKey, to, amount, chainKey);
-  } else {
-    return sendERC20Token(unlocked.privateKey, to, amount, token, chainKey);
+  if (wallet.walletType === 'keystore' && wallet.encryptedKeystore) {
+    const keystoreJson = await unwrapKeystore(wallet.encryptedKeystore, wallet.iv, wallet.salt, password);
+    try {
+      if (isNativeToken(token)) {
+        return await sendNativeTokenWithKeystore(keystoreJson, password, from, to, amount, chainKey);
+      } else {
+        return await sendERC20TokenWithKeystore(keystoreJson, password, from, to, amount, token, chainKey);
+      }
+    } finally {
+      clear_cached_keystore();
+    }
+  } else if (wallet.walletType === 'privateKey' && wallet.encryptedPrivateKey) {
+    const privateKey = await decrypt(wallet.encryptedPrivateKey, wallet.iv, wallet.salt, password);
+    if (isNativeToken(token)) {
+      return sendNativeTokenWithPK(privateKey, to, amount, chainKey);
+    } else {
+      return sendERC20TokenWithPK(privateKey, to, amount, token, chainKey);
+    }
   }
+
+  throw new Error('未知的钱包类型');
 }

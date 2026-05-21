@@ -85,14 +85,14 @@ export function ChatInput({ disabled }: Props) {
           onChange={e => setInput(e.target.value)}
           onKeyDown={handleKeyDown}
           disabled={disabled || loading}
-          className="flex-1 bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 resize-none"
+          className="flex-1 bg-secondary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary resize-none"
           placeholder={disabled ? t('chat.inputDisabled') : t('chat.inputPlaceholder')}
           rows={1}
         />
         <button
           onClick={handleSend}
           disabled={disabled || loading || !input.trim()}
-          className="px-4 py-2 bg-brand-600 hover:bg-brand-700 disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
+          className="px-4 py-2 bg-primary hover:bg-primary-hover disabled:opacity-50 disabled:cursor-not-allowed rounded-lg transition-colors"
         >
           {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Send className="w-4 h-4" />}
         </button>

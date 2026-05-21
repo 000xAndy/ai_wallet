@@ -31,13 +31,13 @@ export function WalletDashboard() {
         <div className="flex gap-2">
           <button
             onClick={() => setShowCreate(true)}
-            className="flex items-center gap-1.5 px-3 py-2 bg-brand-600 hover:bg-brand-700 rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 bg-primary hover:bg-primary-hover rounded-lg text-sm font-medium transition-colors"
           >
             <Plus className="w-4 h-4" /> <span className="hidden sm:inline">{t('wallet.createWallet')}</span>
           </button>
           <button
             onClick={() => setShowImport(true)}
-            className="flex items-center gap-1.5 px-3 py-2 bg-gray-800 hover:bg-gray-700 rounded-lg text-sm font-medium transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 bg-secondary hover:bg-muted rounded-lg text-sm font-medium transition-colors"
           >
             <Download className="w-4 h-4" /> <span className="hidden sm:inline">{t('wallet.importWallet')}</span>
           </button>
@@ -46,11 +46,11 @@ export function WalletDashboard() {
 
       {wallets.length === 0 ? (
         <div className="text-center py-20">
-          <div className="w-16 h-16 bg-gray-800 rounded-full flex items-center justify-center mx-auto mb-4">
-            <Key className="w-8 h-8 text-gray-500" />
+          <div className="w-16 h-16 bg-secondary rounded-full flex items-center justify-center mx-auto mb-4">
+            <Key className="w-8 h-8 text-muted-foreground" />
           </div>
-          <h2 className="text-lg font-medium text-gray-400 mb-2">{t('wallet.noWallet')}</h2>
-          <p className="text-sm text-gray-600 mb-4">{t('wallet.noWalletDesc')}</p>
+          <h2 className="text-lg font-medium text-muted-foreground mb-2">{t('wallet.noWallet')}</h2>
+          <p className="text-sm text-text-tertiary mb-4">{t('wallet.noWalletDesc')}</p>
         </div>
       ) : (
         <div className="space-y-4">

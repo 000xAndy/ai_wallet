@@ -1,5 +1,7 @@
 import { ethers } from 'ethers';
-import { CHAINS, ERC20_ABI } from '@/lib/constants';
+import { sign_tx } from '@consenlabs/tcx-wasm';
+import { ensureTcxInit } from './tcx-init.service';
+import { CHAINS, ERC20_ABI, TCX_DERIVATION_PATH } from '@/lib/constants';
 import type { WalletBalance, TokenBalance } from '@/types/wallet';
 
 async function withFallback<T>(chainKey: string, fn: (rpcUrl: string) => Promise<T>): Promise<T> {
@@ -16,6 +18,8 @@ async function withFallback<T>(chainKey: string, fn: (rpcUrl: string) => Promise
   }
   throw lastError ?? new Error(`无法连接到 ${chain.name}`);
 }
+
+// ---- Balance ----
 
 export async function getNativeBalance(address: string, chainKey: string): Promise<string> {
   return withFallback(chainKey, async (rpcUrl) => {
@@ -57,11 +61,13 @@ export async function getFullBalance(address: string, chainKey: string): Promise
   });
 }
 
-export async function sendNativeToken(
+// ---- Sending with private key (legacy / private-key wallets) ----
+
+export async function sendNativeTokenWithPK(
   privateKey: string,
   to: string,
   amount: string,
-  chainKey: string
+  chainKey: string,
 ): Promise<string> {
   return withFallback(chainKey, async (rpcUrl) => {
     const provider = new ethers.JsonRpcProvider(rpcUrl);
@@ -71,12 +77,12 @@ export async function sendNativeToken(
   });
 }
 
-export async function sendERC20Token(
+export async function sendERC20TokenWithPK(
   privateKey: string,
   to: string,
   amount: string,
   tokenSymbol: string,
-  chainKey: string
+  chainKey: string,
 ): Promise<string> {
   const chain = CHAINS[chainKey];
   if (!chain) throw new Error(`不支持的链: ${chainKey}`);
@@ -90,6 +96,96 @@ export async function sendERC20Token(
     const contract = new ethers.Contract(token.contractAddress!, ERC20_ABI, wallet);
     const parsedAmount = ethers.parseUnits(amount, token.decimals);
     const tx = await contract.transfer(to, parsedAmount);
+    return tx.hash;
+  });
+}
+
+// ---- Sending with tcx-wasm keystore ----
+
+export async function sendNativeTokenWithKeystore(
+  keystoreJson: string,
+  password: string,
+  from: string,
+  to: string,
+  amount: string,
+  chainKey: string,
+): Promise<string> {
+  const chain = CHAINS[chainKey];
+  if (!chain) throw new Error(`不支持的链: ${chainKey}`);
+
+  await ensureTcxInit();
+
+  return withFallback(chainKey, async (rpcUrl) => {
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const feeData = await provider.getFeeData();
+    const gasPrice = feeData.gasPrice ?? BigInt(0);
+    const nonce = await provider.getTransactionCount(from);
+
+    const signResult = sign_tx(JSON.stringify({
+      keystoreJson,
+      key: password,
+      derivationPath: TCX_DERIVATION_PATH,
+      input: {
+        nonce: nonce.toString(),
+        gasPrice: gasPrice.toString(),
+        gasLimit: '21000',
+        to,
+        value: ethers.parseEther(amount).toString(),
+        chainId: String(chain.chainId),
+      },
+    }));
+
+    const parsed = JSON.parse(signResult);
+    const signedTx = parsed.signature ?? parsed.signedTx ?? parsed;
+    const tx = await provider.broadcastTransaction(signedTx);
+    return tx.hash;
+  });
+}
+
+export async function sendERC20TokenWithKeystore(
+  keystoreJson: string,
+  password: string,
+  from: string,
+  to: string,
+  amount: string,
+  tokenSymbol: string,
+  chainKey: string,
+): Promise<string> {
+  const chain = CHAINS[chainKey];
+  if (!chain) throw new Error(`不支持的链: ${chainKey}`);
+
+  const token = chain.tokens.find(t => t.symbol.toUpperCase() === tokenSymbol.toUpperCase());
+  if (!token?.contractAddress) throw new Error(`不支持的代币: ${tokenSymbol} 在 ${chain.name}`);
+
+  await ensureTcxInit();
+
+  return withFallback(chainKey, async (rpcUrl) => {
+    const provider = new ethers.JsonRpcProvider(rpcUrl);
+    const feeData = await provider.getFeeData();
+    const gasPrice = feeData.gasPrice ?? BigInt(0);
+    const nonce = await provider.getTransactionCount(from);
+
+    const iface = new ethers.Interface(ERC20_ABI);
+    const data = iface.encodeFunctionData('transfer', [to, ethers.parseUnits(amount, token.decimals)]);
+
+    const signResult = sign_tx(JSON.stringify({
+      keystoreJson,
+      key: password,
+      derivationPath: TCX_DERIVATION_PATH,
+      input: {
+        nonce: nonce.toString(),
+        gasPrice: gasPrice.toString(),
+        gasLimit: '100000',
+        to: token.contractAddress!,
+        value: '0',
+        data,
+        chainId: String(chain.chainId),
+      },
+    }));
+
+    const parsed = JSON.parse(signResult);
+    const signedTx = parsed.signature ?? parsed.signedTx ?? parsed;
+    const tx = await provider.broadcastTransaction(signedTx);
     return tx.hash;
   });
 }
@@ -238,7 +334,6 @@ export async function getTokenAllowances(address: string, chainKey: string): Pro
     for (const token of chain.tokens) {
       if (!token.contractAddress) continue;
 
-      // Query Transfer events to find spenders that have allowances
       const filter = {
         address: token.contractAddress,
         topics: [
@@ -293,7 +388,7 @@ export async function revokeApproval(
   privateKey: string,
   contractAddress: string,
   spender: string,
-  chainKey: string
+  chainKey: string,
 ): Promise<string> {
   const chain = CHAINS[chainKey];
   if (!chain) throw new Error(`不支持的链: ${chainKey}`);
@@ -319,6 +414,24 @@ export function resolveChainKey(networkName: string, networkMode: 'mainnet' | 't
     polygon: { mainnet: 'polygon_mainnet', testnet: 'polygon_amoy' },
     matic: { mainnet: 'polygon_mainnet', testnet: 'polygon_amoy' },
     pol: { mainnet: 'polygon_mainnet', testnet: 'polygon_amoy' },
+    arbitrum: { mainnet: 'arbitrum_mainnet', testnet: 'arbitrum_sepolia' },
+    arb: { mainnet: 'arbitrum_mainnet', testnet: 'arbitrum_sepolia' },
+    arbitrum_one: { mainnet: 'arbitrum_mainnet', testnet: 'arbitrum_sepolia' },
+    optimism: { mainnet: 'optimism_mainnet', testnet: 'optimism_sepolia' },
+    op: { mainnet: 'optimism_mainnet', testnet: 'optimism_sepolia' },
+    'op mainnet': { mainnet: 'optimism_mainnet', testnet: 'optimism_sepolia' },
+    avalanche: { mainnet: 'avalanche_mainnet', testnet: 'avalanche_fuji' },
+    avax: { mainnet: 'avalanche_mainnet', testnet: 'avalanche_fuji' },
+    'c-chain': { mainnet: 'avalanche_mainnet', testnet: 'avalanche_fuji' },
+    base: { mainnet: 'base_mainnet', testnet: 'base_sepolia' },
+    linea: { mainnet: 'linea_mainnet', testnet: 'linea_mainnet' },
+    fantom: { mainnet: 'fantom_mainnet', testnet: 'fantom_mainnet' },
+    ftm: { mainnet: 'fantom_mainnet', testnet: 'fantom_mainnet' },
+    'fantom opera': { mainnet: 'fantom_mainnet', testnet: 'fantom_mainnet' },
+    scroll: { mainnet: 'scroll_mainnet', testnet: 'scroll_mainnet' },
+    gnosis: { mainnet: 'gnosis_mainnet', testnet: 'gnosis_mainnet' },
+    'gnosis chain': { mainnet: 'gnosis_mainnet', testnet: 'gnosis_mainnet' },
+    celo: { mainnet: 'celo_mainnet', testnet: 'celo_mainnet' },
   };
   const entry = mapping[name];
   if (entry) return isTestnet ? entry.testnet : entry.mainnet;

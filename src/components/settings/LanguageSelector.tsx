@@ -14,9 +14,9 @@ export function LanguageSelector() {
   const { t } = useTranslation();
 
   return (
-    <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+    <div className="bg-card border border-border rounded-xl p-5">
       <div className="flex items-center gap-2 mb-4">
-        <Globe className="w-5 h-5 text-brand-400" />
+        <Globe className="w-5 h-5 text-primary" />
         <h2 className="text-lg font-semibold">{t('settings.language')}</h2>
       </div>
       <div className="flex gap-2">
@@ -26,8 +26,8 @@ export function LanguageSelector() {
             onClick={() => setLanguage(code)}
             className={`flex-1 py-2 text-sm rounded-lg transition-colors ${
               language === code
-                ? 'bg-brand-600 text-white'
-                : 'bg-gray-800 text-gray-400 hover:text-gray-200'
+                ? 'bg-primary text-white'
+                : 'bg-secondary text-muted-foreground hover:text-foreground'
             }`}
           >
             {label}

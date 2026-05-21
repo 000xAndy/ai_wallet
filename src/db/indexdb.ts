@@ -4,7 +4,7 @@ import type { Contact } from '@/types/contact';
 import type { ChatSession } from '@/types/chat';
 
 const DB_NAME = 'ai-wallet';
-const DB_VERSION = 1;
+const DB_VERSION = 2;
 
 interface AiWalletDB {
   wallets: StoredWallet;
@@ -18,10 +18,15 @@ let dbInstance: IDBPDatabase<AiWalletDB> | null = null;
 export async function getDB(): Promise<IDBPDatabase<AiWalletDB>> {
   if (dbInstance) return dbInstance;
   dbInstance = await openDB<AiWalletDB>(DB_NAME, DB_VERSION, {
-    upgrade(db) {
-      if (!db.objectStoreNames.contains('wallets')) {
+    upgrade(db, oldVersion) {
+      // v1 → v2: wallet schema changed (walletType, encryptedKeystore)
+      if (oldVersion < 2) {
+        if (db.objectStoreNames.contains('wallets')) {
+          db.deleteObjectStore('wallets');
+        }
         db.createObjectStore('wallets', { keyPath: 'id' });
       }
+
       if (!db.objectStoreNames.contains('contacts')) {
         db.createObjectStore('contacts', { keyPath: 'id' });
       }

@@ -51,11 +51,11 @@ export function ImportWalletDialog({ open, onClose }: Props) {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onClose}>
-      <div className="bg-gray-900 border border-gray-800 rounded-2xl p-4 md:p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
+      <div className="bg-card border border-border rounded-20 p-4 md:p-6 w-full max-w-md mx-4" onClick={e => e.stopPropagation()}>
         <h2 className="text-xl font-bold mb-4">{t('importWallet.title')}</h2>
 
         {error && (
-          <div className="flex items-center gap-2 p-2 mb-4 bg-red-500/10 border border-red-500/30 rounded-lg text-red-400 text-sm">
+          <div className="flex items-center gap-2 p-2 mb-4 bg-destructive/10 border border-destructive/30 rounded-lg text-destructive text-sm">
             <AlertCircle className="w-4 h-4 flex-shrink-0" /> {error}
           </div>
         )}
@@ -63,52 +63,52 @@ export function ImportWalletDialog({ open, onClose }: Props) {
         <div className="flex gap-2 mb-4">
           <button
             onClick={() => setMode('mnemonic')}
-            className={`flex-1 py-2 text-sm rounded-lg transition-colors ${mode === 'mnemonic' ? 'bg-brand-600 text-white' : 'bg-gray-800 text-gray-400'}`}
+            className={`flex-1 py-2 text-sm rounded-lg transition-colors ${mode === 'mnemonic' ? 'bg-primary text-white' : 'bg-secondary text-muted-foreground'}`}
           >{t('importWallet.mnemonic')}</button>
           <button
             onClick={() => setMode('privateKey')}
-            className={`flex-1 py-2 text-sm rounded-lg transition-colors ${mode === 'privateKey' ? 'bg-brand-600 text-white' : 'bg-gray-800 text-gray-400'}`}
+            className={`flex-1 py-2 text-sm rounded-lg transition-colors ${mode === 'privateKey' ? 'bg-primary text-white' : 'bg-secondary text-muted-foreground'}`}
           >{t('importWallet.privateKey')}</button>
         </div>
 
         <div className="space-y-3">
           <div>
-            <label className="block text-sm text-gray-400 mb-1">
+            <label className="block text-sm text-muted-foreground mb-1">
               {mode === 'mnemonic' ? t('importWallet.mnemonic') : t('importWallet.privateKey')}
             </label>
             <textarea
               value={input} onChange={e => setInput(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500 resize-none h-20"
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary resize-none h-20"
               placeholder={mode === 'mnemonic' ? t('importWallet.mnemonicPlaceholder') : t('importWallet.privateKeyPlaceholder')}
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-1">{t('createWallet.name')}</label>
+            <label className="block text-sm text-muted-foreground mb-1">{t('createWallet.name')}</label>
             <input
               type="text" value={name} onChange={e => setName(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500"
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-1">{t('createWallet.password')}</label>
+            <label className="block text-sm text-muted-foreground mb-1">{t('createWallet.password')}</label>
             <input
               type="password" value={password} onChange={e => setPassword(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500"
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
             />
           </div>
           <div>
-            <label className="block text-sm text-gray-400 mb-1">{t('createWallet.confirmPassword')}</label>
+            <label className="block text-sm text-muted-foreground mb-1">{t('createWallet.confirmPassword')}</label>
             <input
               type="password" value={confirmPassword} onChange={e => setConfirmPassword(e.target.value)}
-              className="w-full bg-gray-800 border border-gray-700 rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-brand-500"
+              className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
             />
           </div>
-          <button onClick={handleImport} className="w-full py-2.5 bg-brand-600 hover:bg-brand-700 rounded-lg text-sm font-medium transition-colors">
+          <button onClick={handleImport} className="w-full py-2.5 bg-primary hover:bg-primary-hover rounded-lg text-sm font-medium transition-colors">
 {t('importWallet.import')}
           </button>
         </div>
 
-        <button onClick={() => { reset(); onClose(); }} className="mt-3 w-full py-2 text-sm text-gray-500 hover:text-gray-300">
+        <button onClick={() => { reset(); onClose(); }} className="mt-3 w-full py-2 text-sm text-muted-foreground hover:text-foreground">
           {t('common.cancel')}
         </button>
       </div>

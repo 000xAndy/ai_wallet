@@ -21,14 +21,14 @@ export function Sidebar({ onClose }: Props) {
   ];
 
   return (
-    <aside className="w-56 h-full bg-gray-900 border-r border-gray-800 flex flex-col">
-      <div className="p-4 border-b border-gray-800 flex items-center justify-between">
+    <aside className="w-56 h-full bg-card border-r border-border flex flex-col">
+      <div className="p-4 border-b border-border flex items-center justify-between">
         <div className="flex items-center gap-2">
-          <Shield className="w-6 h-6 text-brand-500" />
+          <Shield className="w-6 h-6 text-primary" />
           <span className="font-bold text-lg gradient-text">AI Wallet</span>
         </div>
         {onClose && (
-          <button onClick={onClose} className="md:hidden p-1 text-gray-400 hover:text-gray-200">
+          <button onClick={onClose} className="md:hidden p-1 text-muted-foreground hover:text-foreground">
             <X className="w-5 h-5" />
           </button>
         )}
@@ -43,8 +43,8 @@ export function Sidebar({ onClose }: Props) {
             className={({ isActive }) => cn(
               'flex items-center gap-3 px-3 py-2.5 rounded-lg mb-1 transition-colors',
               isActive
-                ? 'bg-brand-600/20 text-brand-400'
-                : 'text-gray-400 hover:text-gray-200 hover:bg-gray-800'
+                ? 'bg-primary text-primary-foreground shadow-nav-active'
+                : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
             )}
           >
             <Icon className="w-4 h-4" />
@@ -53,20 +53,20 @@ export function Sidebar({ onClose }: Props) {
         ))}
       </nav>
 
-      <div className="p-3 border-t border-gray-800 space-y-2">
+      <div className="p-3 border-t border-border space-y-2">
         <button
           onClick={() => setNetworkMode(isTestnet ? 'mainnet' : 'testnet')}
           className={cn(
-            'flex items-center gap-2 w-full px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+            'flex items-center gap-2 w-full px-3 py-2 rounded-full text-sm font-medium transition-colors',
             isTestnet
               ? 'bg-yellow-500/10 text-yellow-400 border border-yellow-500/30'
-              : 'bg-gray-800 text-gray-400 hover:text-gray-200 border border-gray-700'
+              : 'bg-secondary text-muted-foreground hover:text-foreground'
           )}
         >
           <FlaskConical className="w-4 h-4" />
           {isTestnet ? t('sidebar.testnetMode') : t('sidebar.testnet')}
         </button>
-        <div className="text-xs text-gray-600 text-center">v1.0.0</div>
+        <div className="text-xs text-text-tertiary text-center">v1.0.0</div>
       </div>
     </aside>
   );

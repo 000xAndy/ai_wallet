@@ -14,7 +14,7 @@ interface WalletState {
   error: string | null;
 
   loadWallets: () => Promise<void>;
-  createWallet: (password: string, name: string) => Promise<StoredWallet>;
+  createWallet: (password: string, name: string, mnemonic: string) => Promise<StoredWallet>;
   importMnemonic: (mnemonic: string, password: string, name: string) => Promise<StoredWallet>;
   importPrivateKey: (pk: string, password: string, name: string) => Promise<StoredWallet>;
   removeWallet: (id: string) => Promise<void>;
@@ -53,14 +53,16 @@ export const useWalletStore = create<WalletState>((set, get) => ({
     set({ defaultWalletId: id });
   },
 
-  createWallet: async (password, name) => {
+  createWallet: async (password, name, mnemonic) => {
     set({ loading: true, error: null });
     try {
-      const wallet = await walletService.createWallet(password, name);
+      const wallet = await walletService.createWallet(password, name, mnemonic);
       set(s => ({ wallets: [...s.wallets, wallet], selectedWalletId: wallet.id, loading: false }));
       return wallet;
     } catch (e: any) {
-      set({ error: e.message, loading: false });
+      const msg = String(e?.message ?? e ?? 'Unknown error');
+      console.error('[wallet.store] createWallet failed:', e);
+      set({ error: msg, loading: false });
       throw e;
     }
   },

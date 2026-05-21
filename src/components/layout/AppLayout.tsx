@@ -8,7 +8,7 @@ export function AppLayout({ children }: { children: ReactNode }) {
   const { t } = useTranslation();
 
   return (
-    <div className="flex h-screen bg-gray-950 text-gray-100">
+    <div className="flex h-screen bg-background text-foreground">
       {/* Desktop sidebar — always visible */}
       <div className="hidden md:block h-full">
         <Sidebar />
@@ -26,14 +26,14 @@ export function AppLayout({ children }: { children: ReactNode }) {
 
       <main className="flex-1 overflow-y-auto flex flex-col">
         {/* Mobile header bar */}
-        <div className="md:hidden flex items-center gap-2 px-4 py-2 border-b border-gray-800 bg-gray-900">
+        <div className="md:hidden flex items-center gap-2 px-4 py-2 border-b border-border bg-card">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-1.5 text-gray-400 hover:text-gray-200"
+            className="p-1.5 text-muted-foreground hover:text-foreground"
           >
             <Menu className="w-5 h-5" />
           </button>
-          <span className="font-bold text-sm text-brand-400">{t('common.appName')}</span>
+          <span className="font-bold text-sm gradient-text">{t('common.appName')}</span>
         </div>
         <div className="flex-1 overflow-y-auto">
           {children}
