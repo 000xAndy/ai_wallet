@@ -33,7 +33,17 @@
     "copyAddress": "Copy address",
     "deleteConfirm": "Confirm delete this wallet? Make sure you have backed up the private key or mnemonic.",
     "defaultSet": "Default",
-    "setDefault": "Set as default"
+    "setDefault": "Set as default",
+    "transactionHistory": "Recent Transactions",
+    "sent": "Sent",
+    "received": "Received",
+    "txSuccess": "Success",
+    "txFailed": "Failed",
+    "txPending": "Pending",
+    "loading": "Loading...",
+    "noTransactions": "No transactions yet",
+    "to": "To",
+    "from": "From"
   },
   "createWallet": {
     "title": "Create New Wallet",

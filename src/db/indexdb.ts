@@ -1,16 +1,17 @@
 import { openDB, type IDBPDatabase } from 'idb';
-import type { StoredWallet } from '@/types/wallet';
+import type { StoredWallet, StoredTransaction } from '@/types/wallet';
 import type { Contact } from '@/types/contact';
 import type { ChatSession } from '@/types/chat';
 
 const DB_NAME = 'ai-wallet';
-const DB_VERSION = 2;
+const DB_VERSION = 3;
 
 interface AiWalletDB {
   wallets: StoredWallet;
   contacts: Contact;
   settings: { key: string; value: unknown };
   chatSessions: ChatSession;
+  transactions: StoredTransaction;
 }
 
 let dbInstance: IDBPDatabase<AiWalletDB> | null = null;
@@ -35,6 +36,10 @@ export async function getDB(): Promise<IDBPDatabase<AiWalletDB>> {
       }
       if (!db.objectStoreNames.contains('chatSessions')) {
         db.createObjectStore('chatSessions', { keyPath: 'id' });
+      }
+      if (!db.objectStoreNames.contains('transactions')) {
+        const txStore = db.createObjectStore('transactions', { keyPath: 'id' });
+        txStore.createIndex('chainKey', 'chainKey');
       }
     },
   });
@@ -109,4 +114,29 @@ export async function saveChatSession(session: ChatSession): Promise<void> {
 export async function deleteChatSession(id: string): Promise<void> {
   const db = await getDB();
   await db.delete('chatSessions', id);
+}
+
+export async function getTransactions(chainKey: string, limit = 50): Promise<StoredTransaction[]> {
+  const db = await getDB();
+  const all = await db.getAllFromIndex('transactions', 'chainKey', chainKey);
+  return all.sort((a, b) => b.timestamp - a.timestamp).slice(0, limit);
+}
+
+export async function saveTransactions(txs: StoredTransaction[]): Promise<void> {
+  const db = await getDB();
+  const tx = db.transaction('transactions', 'readwrite');
+  for (const t of txs) {
+    await tx.store.put(t);
+  }
+  await tx.done;
+}
+
+export async function deleteTransactionsForChain(chainKey: string): Promise<void> {
+  const db = await getDB();
+  const all = await db.getAllFromIndex('transactions', 'chainKey', chainKey);
+  const tx = db.transaction('transactions', 'readwrite');
+  for (const t of all) {
+    await tx.store.delete(t.id);
+  }
+  await tx.done;
 }

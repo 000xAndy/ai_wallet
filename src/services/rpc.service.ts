@@ -1,7 +1,7 @@
 import { ethers } from 'ethers';
 import { sign_tx } from '@consenlabs/tcx-wasm';
 import { ensureTcxInit } from './tcx-init.service';
-import { CHAINS, ERC20_ABI, TCX_DERIVATION_PATH } from '@/lib/constants';
+import { CHAINS, ERC20_ABI, TCX_DERIVATION_PATH, getExplorerApiKey } from '@/lib/constants';
 import type { WalletBalance, TokenBalance } from '@/types/wallet';
 
 async function withFallback<T>(chainKey: string, fn: (rpcUrl: string) => Promise<T>): Promise<T> {
@@ -9,11 +9,16 @@ async function withFallback<T>(chainKey: string, fn: (rpcUrl: string) => Promise
   if (!chain) throw new Error(`不支持的链: ${chainKey}`);
   const urls = [chain.rpcUrl, ...(chain.fallbackRpcs ?? [])];
   let lastError: Error | null = null;
-  for (const url of urls) {
+  for (let i = 0; i < urls.length; i++) {
+    const url = urls[i];
     try {
-      return await fn(url);
+      console.log(`[withFallback] Trying RPC [${i + 1}/${urls.length}]: ${url}`);
+      const result = await fn(url);
+      console.log(`[withFallback] RPC [${i + 1}/${urls.length}] succeeded`);
+      return result;
     } catch (e: any) {
       lastError = e;
+      console.warn(`[withFallback] RPC [${i + 1}/${urls.length}] failed:`, e?.message ?? e, `| url=${url}`);
     }
   }
   throw lastError ?? new Error(`无法连接到 ${chain.name}`);
@@ -118,26 +123,49 @@ export async function sendNativeTokenWithKeystore(
   return withFallback(chainKey, async (rpcUrl) => {
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const feeData = await provider.getFeeData();
-    const gasPrice = feeData.gasPrice ?? BigInt(0);
-    const nonce = await provider.getTransactionCount(from);
+    const nonce = await provider.getTransactionCount(from, 'pending');
+    console.log('[sendNativeTokenWithKeystore] feeData:', { gasPrice: feeData.gasPrice?.toString(), maxFeePerGas: feeData.maxFeePerGas?.toString(), maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString() });
+    console.log('[sendNativeTokenWithKeystore] nonce:', nonce, 'from:', from);
 
-    const signResult = sign_tx(JSON.stringify({
+    const maxPriorityFeePerGas = (feeData.maxPriorityFeePerGas ?? ethers.parseUnits('1', 'gwei')) * 120n / 100n;
+    const maxFeePerGas = (feeData.maxFeePerGas ?? feeData.gasPrice ?? ethers.parseUnits('5', 'gwei')) * 120n / 100n;
+
+    const txInput = {
       keystoreJson,
       key: password,
       derivationPath: TCX_DERIVATION_PATH,
       input: {
         nonce: nonce.toString(),
-        gasPrice: gasPrice.toString(),
         gasLimit: '21000',
         to,
         value: ethers.parseEther(amount).toString(),
         chainId: String(chain.chainId),
+        txType: '02',
+        maxFeePerGas: maxFeePerGas.toString(),
+        maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+        accessList: [],
       },
-    }));
+    };
+    console.log('[sendNativeTokenWithKeystore] sign_tx input:', JSON.stringify(txInput, null, 2));
+
+    const signResult = sign_tx(JSON.stringify(txInput));
+    console.log('[sendNativeTokenWithKeystore] sign_tx raw result (first 200 chars):', signResult.substring(0, 200));
 
     const parsed = JSON.parse(signResult);
-    const signedTx = parsed.signature ?? parsed.signedTx ?? parsed;
+    console.log('[sendNativeTokenWithKeystore] parsed keys:', Object.keys(parsed));
+    let signedTx: string = parsed.signature ?? parsed.signedTx ?? parsed;
+    if (typeof signedTx !== 'string') {
+      console.warn('[sendNativeTokenWithKeystore] signedTx is not a string, type:', typeof signedTx, 'value:', signedTx);
+      signedTx = String(signedTx);
+    }
+    // ethers v6 broadcastTransaction requires 0x prefix for getBytes()
+    if (!signedTx.startsWith('0x')) {
+      signedTx = '0x' + signedTx;
+    }
+    console.log('[sendNativeTokenWithKeystore] broadcasting signedTx (first 100 chars):', signedTx.substring(0, 100));
+
     const tx = await provider.broadcastTransaction(signedTx);
+    console.log('[sendNativeTokenWithKeystore] tx hash:', tx.hash);
     return tx.hash;
   });
 }
@@ -162,30 +190,53 @@ export async function sendERC20TokenWithKeystore(
   return withFallback(chainKey, async (rpcUrl) => {
     const provider = new ethers.JsonRpcProvider(rpcUrl);
     const feeData = await provider.getFeeData();
-    const gasPrice = feeData.gasPrice ?? BigInt(0);
-    const nonce = await provider.getTransactionCount(from);
+    const nonce = await provider.getTransactionCount(from, 'pending');
+    console.log('[sendERC20TokenWithKeystore] feeData:', { gasPrice: feeData.gasPrice?.toString(), maxFeePerGas: feeData.maxFeePerGas?.toString(), maxPriorityFeePerGas: feeData.maxPriorityFeePerGas?.toString() });
+    console.log('[sendERC20TokenWithKeystore] nonce:', nonce, 'from:', from, 'token:', tokenSymbol);
+
+    const maxPriorityFeePerGas = (feeData.maxPriorityFeePerGas ?? ethers.parseUnits('1', 'gwei')) * 120n / 100n;
+    const maxFeePerGas = (feeData.maxFeePerGas ?? feeData.gasPrice ?? ethers.parseUnits('5', 'gwei')) * 120n / 100n;
 
     const iface = new ethers.Interface(ERC20_ABI);
     const data = iface.encodeFunctionData('transfer', [to, ethers.parseUnits(amount, token.decimals)]);
 
-    const signResult = sign_tx(JSON.stringify({
+    const txInput = {
       keystoreJson,
       key: password,
       derivationPath: TCX_DERIVATION_PATH,
       input: {
         nonce: nonce.toString(),
-        gasPrice: gasPrice.toString(),
         gasLimit: '100000',
         to: token.contractAddress!,
         value: '0',
         data,
         chainId: String(chain.chainId),
+        txType: '02',
+        maxFeePerGas: maxFeePerGas.toString(),
+        maxPriorityFeePerGas: maxPriorityFeePerGas.toString(),
+        accessList: [],
       },
-    }));
+    };
+    console.log('[sendERC20TokenWithKeystore] sign_tx input:', JSON.stringify(txInput, null, 2));
+
+    const signResult = sign_tx(JSON.stringify(txInput));
+    console.log('[sendERC20TokenWithKeystore] sign_tx raw result (first 200 chars):', signResult.substring(0, 200));
 
     const parsed = JSON.parse(signResult);
-    const signedTx = parsed.signature ?? parsed.signedTx ?? parsed;
+    console.log('[sendERC20TokenWithKeystore] parsed keys:', Object.keys(parsed));
+    let signedTx: string = parsed.signature ?? parsed.signedTx ?? parsed;
+    if (typeof signedTx !== 'string') {
+      console.warn('[sendERC20TokenWithKeystore] signedTx is not a string, type:', typeof signedTx, 'value:', signedTx);
+      signedTx = String(signedTx);
+    }
+    // ethers v6 broadcastTransaction requires 0x prefix for getBytes()
+    if (!signedTx.startsWith('0x')) {
+      signedTx = '0x' + signedTx;
+    }
+    console.log('[sendERC20TokenWithKeystore] broadcasting signedTx (first 100 chars):', signedTx.substring(0, 100));
+
     const tx = await provider.broadcastTransaction(signedTx);
+    console.log('[sendERC20TokenWithKeystore] tx hash:', tx.hash);
     return tx.hash;
   });
 }
@@ -205,20 +256,31 @@ export async function getTransactionHistory(address: string, chainKey: string, l
   const chain = CHAINS[chainKey];
   if (!chain?.explorerApiUrl) return [];
 
+  const params = new URLSearchParams({
+    chainid: String(chain.chainId),
+    module: 'account',
+    action: 'txlist',
+    address,
+    page: '1',
+    offset: String(limit),
+    sort: 'desc',
+    apikey: getExplorerApiKey(),
+  });
+
+  const url = `${chain.explorerApiUrl}?${params}`;
+  console.log('[getTransactionHistory] fetching:', url);
+
   try {
-    const params = new URLSearchParams({
-      chainid: String(chain.chainId),
-      module: 'account',
-      action: 'txlist',
-      address,
-      page: '1',
-      offset: String(limit),
-      sort: 'desc',
-    });
-    const url = `${chain.explorerApiUrl}?${params}`;
     const res = await fetch(url);
     const data = await res.json();
-    if (data.status !== '1' || !Array.isArray(data.result)) return [];
+    console.log('[getTransactionHistory] response status:', data.status, 'result count:', Array.isArray(data.result) ? data.result.length : 'N/A');
+
+    // v2 unified API: status "0" = success, "1" = error
+    if (data.status !== '0' || !Array.isArray(data.result)) {
+      console.warn('[getTransactionHistory] invalid response:', data);
+      return [];
+    }
+
     return data.result.slice(0, limit).map((tx: any) => ({
       hash: tx.hash,
       from: tx.from,
@@ -227,7 +289,8 @@ export async function getTransactionHistory(address: string, chainKey: string, l
       timestamp: parseInt(tx.timeStamp, 10),
       status: tx.isError === '0' ? 'success' : 'failed',
     }));
-  } catch {
+  } catch (e: any) {
+    console.warn('[getTransactionHistory] fetch error:', e?.message);
     return [];
   }
 }

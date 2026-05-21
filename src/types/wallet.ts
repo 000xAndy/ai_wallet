@@ -59,3 +59,16 @@ export interface TokenBalance {
   balance: string;
   contractAddress?: string;
 }
+
+export interface StoredTransaction {
+  id: string; // hash_chainKey
+  hash: string;
+  from: string;
+  to: string;
+  value: string;
+  timestamp: number;
+  status: 'success' | 'failed' | 'pending';
+  chainKey: string;
+  chainName: string;
+  symbol: string;
+}

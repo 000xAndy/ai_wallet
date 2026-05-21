@@ -1,5 +1,6 @@
 import { streamText, tool } from 'ai';
 import { createOpenAI } from '@ai-sdk/openai';
+import { ethers } from 'ethers';
 import { z } from 'zod';
 import i18n from '@/i18n';
 import { useSettingsStore } from '@/stores/settings.store';
@@ -13,7 +14,10 @@ import {
 } from './rpc.service';
 import { unwrapKeystore, decrypt } from './encryption.service';
 import { clear_cached_keystore } from '@consenlabs/tcx-wasm';
+import { saveTransactions, getTransactions } from '@/db/indexdb';
+import { CHAINS } from '@/lib/constants';
 import type { PendingAction } from '@/types/chat';
+import type { StoredTransaction } from '@/types/wallet';
 
 function t(key: string): string {
   return i18n.t(key);
@@ -242,6 +246,32 @@ function isNativeToken(token: string): boolean {
   return !token || upper === 'BNB' || upper === 'ETH' || upper === 'POL';
 }
 
+async function saveSentTransaction(hash: string, from: string, to: string, amount: string, token: string, chainKey: string): Promise<void> {
+  const chain = CHAINS[chainKey];
+  if (!chain) return;
+  const isNative = isNativeToken(token);
+  const value = isNative ? ethers.parseEther(amount).toString() : '0';
+  const symbol = isNative ? chain.nativeToken.symbol : token.toUpperCase();
+  const tx: StoredTransaction = {
+    id: `${hash}_${chainKey}`,
+    hash,
+    from,
+    to,
+    value,
+    timestamp: Math.floor(Date.now() / 1000),
+    status: 'pending',
+    chainKey,
+    chainName: chain.name,
+    symbol,
+  };
+  try {
+    await saveTransactions([tx]);
+    console.log('[executeTransfer] saved pending tx to local db:', hash);
+  } catch (e) {
+    console.warn('[executeTransfer] failed to save tx locally:', e);
+  }
+}
+
 export async function executeTransfer(pending: PendingAction, password: string): Promise<string> {
   const walletStore = useWalletStore.getState();
   const settingsStore = useSettingsStore.getState();
@@ -251,26 +281,64 @@ export async function executeTransfer(pending: PendingAction, password: string):
   const { to, amount, token = 'BNB', network = 'BSC' } = pending.params;
   const chainKey = resolveChainKey(network, settingsStore.networkMode);
   const from = wallet.addresses[0]?.address ?? '';
+  console.log('[executeTransfer] params:', { to, amount, token, network, chainKey, from, walletType: wallet.walletType, walletId: wallet.id });
+
+  let txHash: string;
 
   if (wallet.walletType === 'keystore' && wallet.encryptedKeystore) {
     const keystoreJson = await unwrapKeystore(wallet.encryptedKeystore, wallet.iv, wallet.salt, password);
+    console.log('[executeTransfer] keystore unwrapped, length:', keystoreJson.length);
     try {
       if (isNativeToken(token)) {
-        return await sendNativeTokenWithKeystore(keystoreJson, password, from, to, amount, chainKey);
+        console.log('[executeTransfer] sending native token via keystore');
+        txHash = await sendNativeTokenWithKeystore(keystoreJson, password, from, to, amount, chainKey);
       } else {
-        return await sendERC20TokenWithKeystore(keystoreJson, password, from, to, amount, token, chainKey);
+        console.log('[executeTransfer] sending ERC20 token via keystore');
+        txHash = await sendERC20TokenWithKeystore(keystoreJson, password, from, to, amount, token, chainKey);
       }
     } finally {
       clear_cached_keystore();
     }
   } else if (wallet.walletType === 'privateKey' && wallet.encryptedPrivateKey) {
     const privateKey = await decrypt(wallet.encryptedPrivateKey, wallet.iv, wallet.salt, password);
+    console.log('[executeTransfer] private key decrypted, using PK path');
     if (isNativeToken(token)) {
-      return sendNativeTokenWithPK(privateKey, to, amount, chainKey);
+      txHash = await sendNativeTokenWithPK(privateKey, to, amount, chainKey);
     } else {
-      return sendERC20TokenWithPK(privateKey, to, amount, token, chainKey);
+      txHash = await sendERC20TokenWithPK(privateKey, to, amount, token, chainKey);
     }
+  } else {
+    throw new Error('未知的钱包类型');
   }
 
-  throw new Error('未知的钱包类型');
+  await saveSentTransaction(txHash, from, to, amount, token, chainKey);
+  // Fire-and-forget: poll receipt to update status from pending → success/failed
+  pollTxReceipt(txHash, chainKey);
+  return txHash;
+}
+
+async function pollTxReceipt(txHash: string, chainKey: string) {
+  const POLL_INTERVAL = 3000;
+  const MAX_ATTEMPTS = 20; // ~60 seconds
+  for (let i = 0; i < MAX_ATTEMPTS; i++) {
+    await new Promise(r => setTimeout(r, POLL_INTERVAL));
+    try {
+      const receipt = await getTransactionReceipt(txHash, chainKey);
+      console.log(`[pollTxReceipt] attempt ${i + 1}:`, receipt.status, 'confirmations:', receipt.confirmations);
+      if (receipt.status === 'pending' || receipt.status === 'not_found') continue;
+
+      // Update local tx status
+      const txs = await getTransactions(chainKey, 50);
+      const tx = txs.find(t => t.hash === txHash);
+      if (tx && tx.status !== receipt.status) {
+        tx.status = receipt.status === 'success' ? 'success' : 'failed';
+        await saveTransactions([tx]);
+        console.log('[pollTxReceipt] updated tx status to:', tx.status);
+      }
+      return;
+    } catch (e: any) {
+      console.warn('[pollTxReceipt] poll error:', e?.message);
+    }
+  }
+  console.warn('[pollTxReceipt] timed out waiting for tx:', txHash);
 }

@@ -33,7 +33,17 @@
     "copyAddress": "アドレスをコピー",
     "deleteConfirm": "このウォレットを削除してもよろしいですか？秘密鍵またはニーモニックをバックアップしていることを確認してください。",
     "defaultSet": "デフォルト設定済み",
-    "setDefault": "デフォルトに設定"
+    "setDefault": "デフォルトに設定",
+    "transactionHistory": "最近の取引",
+    "sent": "送金",
+    "received": "受取",
+    "txSuccess": "成功",
+    "txFailed": "失敗",
+    "txPending": "保留中",
+    "loading": "読み込み中...",
+    "noTransactions": "取引履歴がありません",
+    "to": "送金先",
+    "from": "送金元"
   },
   "createWallet": {
     "title": "新しいウォレットを作成",

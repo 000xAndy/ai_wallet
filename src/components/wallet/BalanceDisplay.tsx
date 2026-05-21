@@ -5,17 +5,18 @@ import type { WalletBalance } from '@/types/wallet';
 import { useTranslation } from 'react-i18next';
 import { RefreshCw, Coins, Copy, Check, ChevronDown } from 'lucide-react';
 import { CHAINS, getChainKey } from '@/lib/constants';
+import { TransactionHistory } from './TransactionHistory';
 
 interface Props {
   networkMode: 'mainnet' | 'testnet';
   address?: string;
 }
 
-const SUPPORTED_CHAINS = ['bsc', 'ethereum', 'polygon', 'arbitrum', 'optimism', 'avalanche', 'base', 'linea', 'fantom', 'scroll', 'gnosis', 'celo'];
+const SUPPORTED_CHAINS = ['ethereum', 'bsc', 'polygon', 'arbitrum', 'optimism', 'avalanche', 'base', 'linea', 'fantom', 'scroll', 'gnosis', 'celo'];
 
 export function BalanceDisplay({ networkMode, address }: Props) {
   const { t } = useTranslation();
-  const [activeChain, setActiveChain] = useState('bsc');
+  const [activeChain, setActiveChain] = useState('ethereum');
   const [balance, setBalance] = useState<WalletBalance | null>(null);
   const [loading, setLoading] = useState(false);
   const [copied, setCopied] = useState(false);
@@ -110,6 +111,8 @@ export function BalanceDisplay({ networkMode, address }: Props) {
           </div>
         )}
       </div>
+
+      <TransactionHistory address={address} chainKey={key} />
     </div>
   );
 }

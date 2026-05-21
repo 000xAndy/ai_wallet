@@ -33,7 +33,17 @@
     "copyAddress": "复制地址",
     "deleteConfirm": "确认删除该钱包？请确保已备份私钥或助记词。",
     "defaultSet": "已设为默认",
-    "setDefault": "设为默认钱包"
+    "setDefault": "设为默认钱包",
+    "transactionHistory": "最近交易",
+    "sent": "转出",
+    "received": "转入",
+    "txSuccess": "成功",
+    "txFailed": "失败",
+    "txPending": "确认中",
+    "loading": "加载中...",
+    "noTransactions": "暂无交易记录",
+    "to": "收款",
+    "from": "付款"
   },
   "createWallet": {
     "title": "创建新钱包",

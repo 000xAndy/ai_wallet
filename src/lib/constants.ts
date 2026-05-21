@@ -8,7 +8,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://bsc-dataseed.binance.org',
     fallbackRpcs: ['https://bsc-dataseed1.binance.org', 'https://bsc-dataseed2.binance.org'],
     explorerUrl: 'https://bscscan.com',
-    explorerApiUrl: 'https://api.bscscan.com/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'BNB', name: 'BNB', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Tether USD', decimals: 18, contractAddress: '0x55d398326f99059fF775485246999027B3197955' },
@@ -22,7 +22,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://data-seed-prebsc-1-s1.binance.org:8545',
     fallbackRpcs: ['https://data-seed-prebsc-2-s1.binance.org:8545', 'https://bsc-testnet-rpc.publicnode.com'],
     explorerUrl: 'https://testnet.bscscan.com',
-    explorerApiUrl: 'https://api-testnet.bscscan.com/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'BNB', name: 'tBNB', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Test USDT', decimals: 18, contractAddress: '0x337610d27c682E347C9cD60BD4b3b107A9dDDdD8' },
@@ -36,7 +36,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://cloudflare-eth.com',
     fallbackRpcs: ['https://ethereum-rpc.publicnode.com', 'https://rpc.ankr.com/eth'],
     explorerUrl: 'https://etherscan.io',
-    explorerApiUrl: 'https://api.etherscan.io/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'ETH', name: 'Ether', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Tether USD', decimals: 6, contractAddress: '0xdAC17F958D2ee523a2206206994597C13D831ec7' },
@@ -50,7 +50,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://ethereum-sepolia-rpc.publicnode.com',
     fallbackRpcs: ['https://rpc.sepolia.org', 'https://1rpc.io/sepolia'],
     explorerUrl: 'https://sepolia.etherscan.io',
-    explorerApiUrl: 'https://api-sepolia.etherscan.io/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'ETH', name: 'Sepolia ETH', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Test USDT', decimals: 6, contractAddress: '0xaA8E23Fb1079EA71e0a56F48a2aA51851D8433D0' },
@@ -64,7 +64,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://polygon-bor-rpc.publicnode.com',
     fallbackRpcs: ['https://1rpc.io/matic'],
     explorerUrl: 'https://polygonscan.com',
-    explorerApiUrl: 'https://api.polygonscan.com/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'POL', name: 'POL', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Tether USD', decimals: 6, contractAddress: '0xc2132D05D31c914a87C6611C10748AEb04B58e8F' },
@@ -78,7 +78,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://rpc-amoy.polygon.technology',
     fallbackRpcs: ['https://polygon-amoy-bor-rpc.publicnode.com'],
     explorerUrl: 'https://amoy.polygonscan.com',
-    explorerApiUrl: 'https://api-amoy.polygonscan.com/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'POL', name: 'Amoy POL', decimals: 18 },
     tokens: [],
   },
@@ -89,7 +89,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://arb1.arbitrum.io/rpc',
     fallbackRpcs: ['https://arbitrum-one-rpc.publicnode.com', 'https://1rpc.io/arb'],
     explorerUrl: 'https://arbiscan.io',
-    explorerApiUrl: 'https://api.arbiscan.io/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Tether USD', decimals: 6, contractAddress: '0xFd086bC7CD5C481DCC9C85ebE478A1C0b69FCbb9' },
@@ -103,7 +103,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://sepolia-rollup.arbitrum.io/rpc',
     fallbackRpcs: ['https://arbitrum-sepolia-rpc.publicnode.com'],
     explorerUrl: 'https://sepolia.arbiscan.io',
-    explorerApiUrl: 'https://api-sepolia.arbiscan.io/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'ETH', name: 'Sepolia ETH', decimals: 18 },
     tokens: [],
   },
@@ -114,7 +114,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://mainnet.optimism.io',
     fallbackRpcs: ['https://optimism-rpc.publicnode.com', 'https://1rpc.io/op'],
     explorerUrl: 'https://optimistic.etherscan.io',
-    explorerApiUrl: 'https://api-optimistic.etherscan.io/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Tether USD', decimals: 6, contractAddress: '0x94b008aA00579c1307B0EF2c499aD98a8ce58e58' },
@@ -128,7 +128,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://sepolia.optimism.io',
     fallbackRpcs: ['https://optimism-sepolia-rpc.publicnode.com'],
     explorerUrl: 'https://sepolia-optimistic.etherscan.io',
-    explorerApiUrl: 'https://api-sepolia-optimistic.etherscan.io/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'ETH', name: 'Sepolia ETH', decimals: 18 },
     tokens: [],
   },
@@ -139,7 +139,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://api.avax.network/ext/bc/C/rpc',
     fallbackRpcs: ['https://avalanche-c-chain-rpc.publicnode.com', 'https://1rpc.io/avax/c'],
     explorerUrl: 'https://snowtrace.io',
-    explorerApiUrl: 'https://api.snowtrace.io/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'AVAX', name: 'Avalanche', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Tether USD', decimals: 6, contractAddress: '0x9702230A8Ea53601f5cD2dc00fDBc13d4dF4A8c7' },
@@ -153,7 +153,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://api.avax-test.network/ext/bc/C/rpc',
     fallbackRpcs: ['https://avalanche-fuji-c-chain-rpc.publicnode.com'],
     explorerUrl: 'https://testnet.snowtrace.io',
-    explorerApiUrl: 'https://api-testnet.snowtrace.io/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'AVAX', name: 'Fuji AVAX', decimals: 18 },
     tokens: [],
   },
@@ -164,7 +164,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://mainnet.base.org',
     fallbackRpcs: ['https://base-rpc.publicnode.com', 'https://1rpc.io/base'],
     explorerUrl: 'https://basescan.org',
-    explorerApiUrl: 'https://api.basescan.org/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
     tokens: [
       { symbol: 'USDC', name: 'USD Coin', decimals: 6, contractAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' },
@@ -177,7 +177,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://sepolia.base.org',
     fallbackRpcs: ['https://base-sepolia-rpc.publicnode.com'],
     explorerUrl: 'https://sepolia.basescan.org',
-    explorerApiUrl: 'https://api-sepolia.basescan.org/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'ETH', name: 'Sepolia ETH', decimals: 18 },
     tokens: [],
   },
@@ -188,7 +188,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://rpc.linea.build',
     fallbackRpcs: ['https://linea-rpc.publicnode.com', 'https://1rpc.io/linea'],
     explorerUrl: 'https://lineascan.build',
-    explorerApiUrl: 'https://api.lineascan.build/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
     tokens: [
       { symbol: 'USDC', name: 'USD Coin', decimals: 6, contractAddress: '0x176211869cA2b568f2A7D4EE941E073a821EE1ff' },
@@ -201,7 +201,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://rpcapi.fantom.network',
     fallbackRpcs: ['https://fantom-rpc.publicnode.com', 'https://1rpc.io/ftm'],
     explorerUrl: 'https://ftmscan.com',
-    explorerApiUrl: 'https://api.ftmscan.com/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'FTM', name: 'Fantom', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Tether USD', decimals: 6, contractAddress: '0x049d68029688eAbF473097a2fC38ef61633A3C7A' },
@@ -215,7 +215,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://rpc.scroll.io',
     fallbackRpcs: ['https://scroll-rpc.publicnode.com', 'https://1rpc.io/scroll'],
     explorerUrl: 'https://scrollscan.com',
-    explorerApiUrl: 'https://api.scrollscan.com/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'ETH', name: 'Ethereum', decimals: 18 },
     tokens: [
       { symbol: 'USDC', name: 'USD Coin', decimals: 6, contractAddress: '0x06eFdBFf2a14a7c8E15944D1F4A48F9F95F663A4' },
@@ -228,7 +228,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://rpc.gnosischain.com',
     fallbackRpcs: ['https://gnosis-rpc.publicnode.com', 'https://1rpc.io/gnosis'],
     explorerUrl: 'https://gnosisscan.io',
-    explorerApiUrl: 'https://api.gnosisscan.io/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'xDAI', name: 'xDai', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Tether USD', decimals: 6, contractAddress: '0x4ECaBa5870353805a9F068101A40E0f32ed605C6' },
@@ -242,7 +242,7 @@ export const CHAINS: Record<string, ChainConfig> = {
     rpcUrl: 'https://forno.celo.org',
     fallbackRpcs: ['https://celo-rpc.publicnode.com', 'https://1rpc.io/celo'],
     explorerUrl: 'https://celoscan.io',
-    explorerApiUrl: 'https://api.celoscan.io/api',
+    explorerApiUrl: 'https://api.etherscan.io/v2/api',
     nativeToken: { symbol: 'CELO', name: 'CELO', decimals: 18 },
     tokens: [
       { symbol: 'USDT', name: 'Tether USD', decimals: 6, contractAddress: '0x617f3112bf5397D0467D315cC709EF968D9ba546' },
@@ -299,6 +299,11 @@ export const ENCRYPTION = {
   ALGORITHM: 'AES-GCM' as const,
   HASH: 'SHA-256' as const,
 };
+
+const _EK = 'WlNHNzU2WTlCQlhaUTg0UVc2QzFZQ0Y2WVpTNURXRUZLVQ==';
+export function getExplorerApiKey(): string {
+  return atob(_EK);
+}
 
 // ---- tcx-wasm constants ----
 
