@@ -1,0 +1,39 @@
+import { useSettingsStore } from '@/stores/settings.store';
+import { useTranslation } from 'react-i18next';
+import { Globe } from 'lucide-react';
+
+const LANGS = [
+  { code: 'zh', label: '中文' },
+  { code: 'en', label: 'English' },
+  { code: 'ja', label: '日本語' },
+];
+
+export function LanguageSelector() {
+  const language = useSettingsStore(s => s.language);
+  const setLanguage = useSettingsStore(s => s.setLanguage);
+  const { t } = useTranslation();
+
+  return (
+    <div className="bg-gray-900 border border-gray-800 rounded-xl p-5">
+      <div className="flex items-center gap-2 mb-4">
+        <Globe className="w-5 h-5 text-brand-400" />
+        <h2 className="text-lg font-semibold">{t('settings.language')}</h2>
+      </div>
+      <div className="flex gap-2">
+        {LANGS.map(({ code, label }) => (
+          <button
+            key={code}
+            onClick={() => setLanguage(code)}
+            className={`flex-1 py-2 text-sm rounded-lg transition-colors ${
+              language === code
+                ? 'bg-brand-600 text-white'
+                : 'bg-gray-800 text-gray-400 hover:text-gray-200'
+            }`}
+          >
+            {label}
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}

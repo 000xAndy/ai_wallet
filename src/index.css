@@ -1,0 +1,22 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: #333 transparent;
+  }
+}
+
+.gradient-text {
+  @apply bg-gradient-to-r from-brand-400 to-brand-600 bg-clip-text text-transparent;
+}
+
+.chat-scroll::-webkit-scrollbar {
+  width: 6px;
+}
+.chat-scroll::-webkit-scrollbar-thumb {
+  background: #333;
+  border-radius: 3px;
+}
