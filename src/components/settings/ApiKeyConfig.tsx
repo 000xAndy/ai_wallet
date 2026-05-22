@@ -96,7 +96,8 @@ export function ApiKeyConfig() {
             onChange={e => setLocalModel(e.target.value)}
             className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
           >
-            <option value="gpt-5.4">GPT-5.4 (推荐)</option>
+            <option value="gpt-5.3-codex">GPT-5.3 Codex (推荐)</option>
+            <option value="gpt-5.4">GPT-5.4</option>
             <option value="gpt-4o-mini">GPT-4o Mini</option>
             <option value="gpt-4o">GPT-4o</option>
             <option value="gpt-4-turbo">GPT-4 Turbo</option>

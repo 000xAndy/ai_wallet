@@ -26,7 +26,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
   openaiApiKey: '',
   aiProvider: 'openai',
   aiBaseUrl: 'https://api.openai.com/v1',
-  aiModel: 'gpt-5.4',
+  aiModel: 'gpt-5.3-codex',
   networkMode: 'mainnet',
   language: 'zh',
   loaded: false,
@@ -35,7 +35,7 @@ export const useSettingsStore = create<SettingsState>((set) => ({
     const key = await getSetting<string>('openaiApiKey') ?? '';
     const provider = await getSetting<'openai' | 'custom'>('aiProvider') ?? 'openai';
     const baseUrl = await getSetting<string>('aiBaseUrl') ?? 'https://api.openai.com/v1';
-    const model = await getSetting<string>('aiModel') ?? 'gpt-5.4';
+    const model = await getSetting<string>('aiModel') ?? 'gpt-5.3-codex';
     const networkMode = await getSetting<NetworkMode>('networkMode') ?? 'mainnet';
     const language = await getSetting<string>('language') ?? 'zh';
     set({ openaiApiKey: key, aiProvider: provider, aiBaseUrl: baseUrl, aiModel: model, networkMode, language, loaded: true });
