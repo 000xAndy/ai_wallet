@@ -96,10 +96,10 @@ export function ApiKeyConfig() {
             onChange={e => setLocalModel(e.target.value)}
             className="w-full bg-secondary border border-border rounded-lg px-3 py-2 text-sm focus:outline-none focus:border-primary"
           >
-            <option value="gpt-4o-mini">GPT-4o Mini (推荐)</option>
+            <option value="gpt-5.4">GPT-5.4 (推荐)</option>
+            <option value="gpt-4o-mini">GPT-4o Mini</option>
             <option value="gpt-4o">GPT-4o</option>
             <option value="gpt-4-turbo">GPT-4 Turbo</option>
-            <option value="gpt-5.4">GPT-5.4</option>
             <option value="deepseek-v4-pro">DeepSeek V4 Pro</option>
             <option value="claude-sonnet-4-6">Claude Sonnet 4.6</option>
             <option value="claude-opus-4-7">Claude Opus 4.7</option>
