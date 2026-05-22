@@ -33,7 +33,7 @@ export function TransferConfirmDialog({ params, onConfirm, onCancel }: Props) {
   };
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60" onClick={onCancel}>
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60">
       <div className="bg-card border border-border rounded-20 p-6 w-full max-w-md" onClick={e => e.stopPropagation()}>
         <h2 className="text-xl font-bold mb-4">
           {txHash ? t('transfer.sentTitle') : t('transfer.confirmTitle')}
