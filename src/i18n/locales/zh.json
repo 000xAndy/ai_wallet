@@ -43,7 +43,8 @@
     "loading": "加载中...",
     "noTransactions": "暂无交易记录",
     "to": "收款",
-    "from": "付款"
+    "from": "付款",
+    "viewOnExplorer": "在浏览器中查看"
   },
   "createWallet": {
     "title": "创建新钱包",

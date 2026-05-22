@@ -43,7 +43,8 @@
     "loading": "Loading...",
     "noTransactions": "No transactions yet",
     "to": "To",
-    "from": "From"
+    "from": "From",
+    "viewOnExplorer": "View on explorer"
   },
   "createWallet": {
     "title": "Create New Wallet",
