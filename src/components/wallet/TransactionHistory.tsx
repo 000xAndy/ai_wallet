@@ -147,16 +147,16 @@ export function TransactionHistory({ address, chainKey }: Props) {
               </span>
             </div>
 
-            <button
-              onClick={e => {
-                e.stopPropagation();
-                openExplorer(tx.hash);
-              }}
+            <a
+              href={chain ? `${chain.explorerUrl}/tx/${tx.hash}` : '#'}
+              target="_blank"
+              rel="noopener noreferrer"
+              onClick={e => e.stopPropagation()}
               className="flex-shrink-0 p-1 text-muted-foreground hover:text-foreground transition-colors"
               title={t('wallet.viewOnExplorer')}
             >
               <ExternalLink className="w-3.5 h-3.5" />
-            </button>
+            </a>
           </div>
         ))}
       </div>
